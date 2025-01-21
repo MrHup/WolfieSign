@@ -53,6 +53,8 @@ def create_envelope():
             "signer_name": data["signer_name"],
             "cc_email": data["cc_email"],
             "cc_name": data["cc_name"],
+            "title": data["title"],
+            "content": data["content"],
             "status": "sent",
         }
 
@@ -63,10 +65,7 @@ def create_envelope():
             "envelope_args": envelope_args,
         }
 
-        # Create envelope
-        result = Eg002SigningViaEmailController.worker(
-            args, DS_JWT["doc_docx"], DS_JWT["doc_pdf"]
-        )
+        result = Eg002SigningViaEmailController.worker(args)
 
         return jsonify(result)
 
