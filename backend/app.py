@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
 from docusign_esign import ApiClient
 from docusign_esign.client.api_exception import ApiException
-from app.eSignature.examples.eg004_envelope_info import Eg004EnvelopeInfoController
+from app.eSignature.examples.doc_info import Eg004EnvelopeInfoController
 from app.jwt_helpers import get_jwt_token, get_private_key
-from app.eSignature.examples.eg002_signing_via_email import (
+from app.eSignature.examples.email_sign import (
     Eg002SigningViaEmailController,
 )
 from app.jwt_config import DS_JWT
