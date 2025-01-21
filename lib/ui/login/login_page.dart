@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
+import 'package:wolfie_sign/ui/login/dot_painter.dart';
 import 'package:wolfie_sign/utils/app_colors.dart';
 import 'package:wolfie_sign/utils/app_text_styles.dart';
 import 'login_controller.dart';
@@ -14,6 +14,10 @@ class LoginPage extends GetView<LoginController> {
       backgroundColor: AppColors.secondaryColor,
       body: Stack(
         children: [
+          CustomPaint(
+            painter: DotPatternPainter(),
+            size: Size.infinite,
+          ),
           Center(
             child: Container(
               constraints: const BoxConstraints(maxWidth: 400),
@@ -111,7 +115,7 @@ class LoginPage extends GetView<LoginController> {
               children: [
                 const Text(
                   'Powered by',
-                  style: AppTextStyles.normal16Gray05,
+                  style: AppTextStyles.body,
                 ),
                 const SizedBox(width: 8),
                 Image.asset(
