@@ -23,11 +23,11 @@ class GroupsPage extends GetView<GroupsController> {
                 child: Obx(
                   () => GridView.builder(
                     gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 400,
+                      mainAxisExtent: 150,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
-                      childAspectRatio: 1.8,
                     ),
                     itemCount: controller.groups.length,
                     itemBuilder: (context, index) {
