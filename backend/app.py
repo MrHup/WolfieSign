@@ -119,7 +119,15 @@ def get_envelope_status(envelope_id):
         # Get envelope info using the controller
         result = Eg004EnvelopeInfoController.worker(args)
 
-        return jsonify(result.to_dict())
+        # Extract only the required fields
+        filtered_response = {
+            "sender_email": result.sender.email,
+            "sender_name": result.sender.user_name,
+            "status": result.status,
+            "status_changed_date_time": result.status_changed_date_time,
+        }
+
+        return jsonify(filtered_response)
 
     except ApiException as err:
         body = err.body.decode("utf8")
