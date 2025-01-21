@@ -9,23 +9,23 @@ class AppTextStyles {
   static const TextStyle title = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.bold,
-    color: Colors.white,
+    color: AppColors.backdropColor,
   );
 
   static const TextStyle cardTitle = TextStyle(
-    fontSize: 27,
+    fontSize: 18,
     fontWeight: FontWeight.bold,
-    color: Colors.white,
+    color: Color.fromARGB(255, 0, 3, 29),
   );
 
   static const TextStyle normal16Gray05 = TextStyle(
     fontSize: 16,
-    color: Color.fromARGB(80, 255, 255, 255),
+    color: AppColors.backdropColor,
   );
 
   static const TextStyle normal14Gray05 = TextStyle(
     fontSize: 14,
-    color: Color.fromARGB(80, 255, 255, 255),
+    color: AppColors.backdropColor,
   );
 
   static const TextStyle fadedText =
