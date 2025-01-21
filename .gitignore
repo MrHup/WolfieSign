@@ -4,6 +4,9 @@
 env
 private.key
 
+# Firebase
+firebase_options.dart
+
 # Miscellaneous
 *.class
 *.log

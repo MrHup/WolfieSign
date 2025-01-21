@@ -2,6 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:wolfie_sign/firebase_options.dart';
+import 'package:wolfie_sign/ui/home/home_binding.dart';
+import 'package:wolfie_sign/ui/home/home_page.dart';
 import 'package:wolfie_sign/ui/login/login_binding.dart';
 import 'package:wolfie_sign/ui/login/login_page.dart';
 import 'package:wolfie_sign/utils/app_colors.dart';
@@ -36,6 +39,11 @@ class App extends StatelessWidget {
             page: () => const LoginPage(),
             binding: LoginBinding(),
           ),
+          GetPage(
+            name: "/home",
+            page: () => const HomePage(),
+            binding: HomeBinding(),
+          ),
         ],
         home: const LoginPage(),
       ),
@@ -48,17 +56,11 @@ void main() async {
   await initialiseServices();
   DependencyCreator.init();
   runApp(App());
-
-  //// for WEB Debugging
-  // runApp(DevicePreview(
-  //   enabled: !kReleaseMode,
-  //   builder: (context) => App(),
-  // ));
 }
 
 Future<void> initialiseServices() async {
   logger.i("Initialising Services");
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 }

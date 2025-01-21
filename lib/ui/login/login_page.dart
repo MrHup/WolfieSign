@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:wolfie_sign/ui/login/dot_painter.dart';
 import 'package:wolfie_sign/utils/app_colors.dart';
 import 'package:wolfie_sign/utils/app_text_styles.dart';
+import 'package:wolfie_sign/utils/logger.dart';
 import 'login_controller.dart';
 
 class LoginPage extends GetView<LoginController> {
@@ -95,7 +96,10 @@ class LoginPage extends GetView<LoginController> {
 
                   // Sign Up Text
                   GestureDetector(
-                    onTap: controller.handleSignUp,
+                    onTap: () {
+                      logger.w(
+                          "Sign up is not implemented yet. Reach out for an account or create it manually.");
+                    },
                     child: const Text(
                       "Don't have an account? Sign up now",
                       style: AppTextStyles.body,
