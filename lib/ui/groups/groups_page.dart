@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wolfie_sign/ui/groups/group_card.dart';
+import 'package:wolfie_sign/ui/groups/group_details_panel.dart';
 import 'package:wolfie_sign/ui/groups/groups_controller.dart';
 import 'package:wolfie_sign/utils/app_text_styles.dart';
 import 'package:wolfie_sign/utils/app_colors.dart';
@@ -53,6 +54,21 @@ class GroupsPage extends GetView<GroupsController> {
             child: const Icon(Icons.add, color: Colors.white),
           ),
         ),
+        Obx(() => AnimatedPositioned(
+              duration: const Duration(milliseconds: 300),
+              right: controller.selectedGroup != null ? 0 : -800,
+              top: 0,
+              bottom: 0,
+              child: controller.selectedGroup != null
+                  ? GroupDetailsPanel(
+                      groupName: controller.selectedGroup!['name'],
+                      members: controller.selectedGroup!['members'],
+                      onClose: controller.closeGroupDetails,
+                      onAddMember: controller.onAddMember,
+                      onCreateDocument: controller.onCreateDocument,
+                    )
+                  : const SizedBox(),
+            )),
       ],
     );
   }
