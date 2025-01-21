@@ -1,41 +1,59 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:wolfie_sign/ui/login/login_page.dart';
+import 'package:wolfie_sign/utils/app_colors.dart';
+import 'package:wolfie_sign/utils/dependencies.dart';
+import 'package:wolfie_sign/utils/logger.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return GlobalLoaderOverlay(
+      overlayColor: AppColors.backgroundColor,
+      overlayWidgetBuilder: (_) {
+        return const Center(
+          child: SizedBox(
+              width: 270, height: 270, child: Center(child: Text("Loading"))),
+        );
+      },
+      child: GetMaterialApp(
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          scaffoldBackgroundColor: AppColors.backgroundColor,
+          appBarTheme: const AppBarTheme(
+            backgroundColor: AppColors.backgroundColor,
+            elevation: 0,
+          ),
+        ),
+        debugShowCheckedModeBanner: false,
+        initialRoute: "/",
+        getPages: [
+          GetPage(name: "/", page: () => const LoginPage()),
+        ],
+        home: const LoginPage(),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initialiseServices();
+  DependencyCreator.init();
+  runApp(App());
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  //// for WEB Debugging
+  // runApp(DevicePreview(
+  //   enabled: !kReleaseMode,
+  //   builder: (context) => App(),
+  // ));
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: const Center(),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {},
-          child: const Icon(Icons.add),
-        ));
-  }
+Future<void> initialiseServices() async {
+  logger.i("Initialising Services");
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
 }

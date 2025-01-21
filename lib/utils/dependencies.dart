@@ -1,0 +1,3 @@
+class DependencyCreator {
+  static init() {}
+}
