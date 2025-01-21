@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:wolfie_sign/utils/app_text_styles.dart';
+import 'member_avatars_row.dart';
 
 class GroupCard extends StatefulWidget {
   final String name;
-  final int memberCount;
+  final List<dynamic> members;
   final VoidCallback onTap;
 
   const GroupCard({
     required this.name,
-    required this.memberCount,
+    required this.members,
     required this.onTap,
     Key? key,
   }) : super(key: key);
@@ -53,11 +54,12 @@ class _GroupCardState extends State<GroupCard> {
                         style: AppTextStyles.cardTitle,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const Spacer(),
                       Text(
-                        '${widget.memberCount} members',
+                        '${widget.members.length} members',
                         style: AppTextStyles.normal14Gray05,
                       ),
+                      const Spacer(),
+                      MemberAvatarsRow(members: widget.members),
                     ],
                   ),
                 ),

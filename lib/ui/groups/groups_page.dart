@@ -20,17 +20,17 @@ class GroupsPage extends GetView<GroupsController> {
             child: Obx(
               () => GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
+                  crossAxisCount: 4,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 1.5,
+                  childAspectRatio: 1.8,
                 ),
                 itemCount: controller.groups.length,
                 itemBuilder: (context, index) {
                   final group = controller.groups[index];
                   return GroupCard(
                     name: group['name'],
-                    memberCount: (group['members'] as List).length,
+                    members: group['members'],
                     onTap: () => controller.onGroupTap(group['name']),
                   );
                 },
