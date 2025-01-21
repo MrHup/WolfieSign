@@ -1,3 +1,9 @@
+# Python server
+*.pyc
+*.pyo
+env
+private.key
+
 # Miscellaneous
 *.class
 *.log
