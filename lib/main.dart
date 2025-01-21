@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:wolfie_sign/ui/login/login_binding.dart';
 import 'package:wolfie_sign/ui/login/login_page.dart';
 import 'package:wolfie_sign/utils/app_colors.dart';
 import 'package:wolfie_sign/utils/dependencies.dart';
@@ -30,7 +31,11 @@ class App extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         initialRoute: "/",
         getPages: [
-          GetPage(name: "/", page: () => const LoginPage()),
+          GetPage(
+            name: "/",
+            page: () => const LoginPage(),
+            binding: LoginBinding(),
+          ),
         ],
         home: const LoginPage(),
       ),
