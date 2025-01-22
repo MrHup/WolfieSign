@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:get/get.dart';
 import 'package:wolfie_sign/ui/document/document_controller.dart';
 import 'package:wolfie_sign/ui/groups/member_avatars_row.dart';
@@ -24,6 +25,7 @@ class DocumentPage extends GetView<DocumentController> {
                 Row(
                   children: [
                     Text(controller.groupName, style: AppTextStyles.cardTitle),
+                    const SizedBox(width: 16),
                     MemberAvatarsRow(members: controller.groupMembers),
                   ],
                 ),
@@ -34,10 +36,10 @@ class DocumentPage extends GetView<DocumentController> {
                 Row(
                   children: [
                     Obx(() => _TemplateButton(
-                          label: 'Travel',
+                          label: 'Custom',
                           isSelected:
-                              controller.selectedTemplate.value == 'Travel',
-                          onTap: () => controller.selectTemplate('Travel'),
+                              controller.selectedTemplate.value == 'Custom',
+                          onTap: () => controller.selectTemplate('Custom'),
                         )),
                     const SizedBox(width: 16),
                     Obx(() => _TemplateButton(
@@ -48,14 +50,25 @@ class DocumentPage extends GetView<DocumentController> {
                         )),
                     const SizedBox(width: 16),
                     Obx(() => _TemplateButton(
-                          label: 'Custom',
+                          label: 'Travel',
                           isSelected:
-                              controller.selectedTemplate.value == 'Custom',
-                          onTap: () => controller.selectTemplate('Custom'),
+                              controller.selectedTemplate.value == 'Travel',
+                          onTap: () => controller.selectTemplate('Travel'),
                         )),
                   ],
                 ),
                 const SizedBox(height: 32),
+                const Text('Document Title', style: AppTextStyles.title),
+                const SizedBox(height: 16),
+                TextField(
+                    controller: controller.titleController,
+                    onChanged: (newText) => controller.updateHtmlTitle(newText),
+                    decoration: const InputDecoration(
+                      filled: true,
+                      fillColor: Color.fromARGB(255, 247, 247, 247),
+                      hintText: 'Example Title',
+                    )),
+                const SizedBox(height: 16),
                 const Text('Document Body', style: AppTextStyles.title),
                 const SizedBox(height: 16),
                 Expanded(
@@ -63,25 +76,31 @@ class DocumentPage extends GetView<DocumentController> {
                     fit: StackFit.expand,
                     children: [
                       TextField(
-                        controller: controller.bodyController,
-                        maxLines: null,
-                        textAlign: TextAlign.start,
-                        expands: true,
-                        decoration: const InputDecoration(
-                          // border: OutlineInputBorder(),
-                          filled: true,
-                          fillColor: Color.fromARGB(255, 241, 241, 241),
-                        ),
-                        onChanged: (_) => print('Hello'),
-                      ),
+                          controller: controller.bodyController,
+                          maxLines: null,
+                          textAlign: TextAlign.start,
+                          expands: true,
+                          decoration: const InputDecoration(
+                            filled: true,
+                            fillColor: Color.fromARGB(255, 247, 247, 247),
+                          ),
+                          onChanged: (newText) =>
+                              controller.updateHtmlBody(newText)),
                       Positioned(
                         right: 8,
                         bottom: 8,
-                        child: IconButton(
-                          color: AppColors.primaryColor,
-                          iconSize: 64,
-                          icon: const Icon(Icons.edit_document),
-                          onPressed: () => print('Transform'),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.primaryColor,
+                          ),
+                          margin: const EdgeInsets.all(16),
+                          child: IconButton(
+                            color: Colors.white,
+                            iconSize: 32,
+                            icon: const Icon(Icons.edit_document),
+                            onPressed: () => print('Transform'),
+                          ),
                         ),
                       ),
                     ],
@@ -96,7 +115,7 @@ class DocumentPage extends GetView<DocumentController> {
                     style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(0),
                         )),
                     child: const Text('Submit', style: AppTextStyles.body),
                   ),
@@ -107,18 +126,26 @@ class DocumentPage extends GetView<DocumentController> {
             final previewSection = Container(
               width: isWideScreen ? 595 : double.infinity,
               height: isWideScreen ? 842 : 500,
-              margin: const EdgeInsets.all(24),
+              margin: EdgeInsets.only(
+                  left: isWideScreen ? 16 : 0, top: isWideScreen ? 0 : 16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
+                    spreadRadius: 2,
                   ),
                 ],
               ),
+              child: SingleChildScrollView(
+                child: Obx(() => HtmlWidget(
+                      controller.htmlBody.value,
+                      textStyle: AppTextStyles.normal16Gray05,
+                    )),
+              ),
             );
-
             if (isWideScreen) {
               return Row(
                 children: [
@@ -127,7 +154,6 @@ class DocumentPage extends GetView<DocumentController> {
                 ],
               );
             }
-
             return SingleChildScrollView(
               child: Column(
                 children: [
