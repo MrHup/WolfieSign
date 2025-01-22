@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:wolfie_sign/firebase_options.dart';
+import 'package:wolfie_sign/ui/document/document_page.dart';
 import 'package:wolfie_sign/ui/home/home_binding.dart';
 import 'package:wolfie_sign/ui/home/home_page.dart';
 import 'package:wolfie_sign/ui/login/login_binding.dart';
@@ -43,6 +44,10 @@ class App extends StatelessWidget {
             name: "/home",
             page: () => const HomePage(),
             binding: HomeBinding(),
+          ),
+          GetPage(
+            name: "/document",
+            page: () => const DocumentPage(),
           ),
         ],
         home: const LoginPage(),

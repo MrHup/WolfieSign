@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:wolfie_sign/ui/document/document_controller.dart';
 import 'package:wolfie_sign/ui/groups/add_group_modal.dart';
 import 'package:wolfie_sign/ui/groups/add_member_modal.dart';
+import 'package:wolfie_sign/ui/home/home_controller.dart';
 import 'package:wolfie_sign/utils/app_colors.dart';
 import 'package:wolfie_sign/utils/logger.dart';
 
@@ -154,6 +156,10 @@ class GroupsController extends GetxController {
   }
 
   void onCreateDocument() {
-    logger.d('Create document clicked');
+    if (selectedGroup != null) {
+      final documentController = Get.find<DocumentController>();
+      documentController.group = selectedGroup!;
+      Get.find<HomeController>().navigateTo(3);
+    }
   }
 }

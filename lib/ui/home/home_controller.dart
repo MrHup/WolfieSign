@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:wolfie_sign/ui/document/document_page.dart';
 import 'package:wolfie_sign/ui/groups/groups_page.dart';
 import 'package:wolfie_sign/ui/inner_home/inner_home_page.dart';
 import 'package:wolfie_sign/ui/profile/profile_page.dart';
@@ -15,6 +16,8 @@ class HomeController extends GetxController {
         return const InnerHomePage();
       case 2:
         return const ProfilePage();
+      case 3:
+        return const DocumentPage();
       default:
         return const InnerHomePage();
     }
