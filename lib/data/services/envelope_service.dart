@@ -30,4 +30,41 @@ class EnvelopeService {
       return null;
     }
   }
+
+  Future<dynamic> createEnvelopes({
+    required String content,
+    required String ccEmail,
+    required String ccName,
+    required String title,
+    required List<Map<String, dynamic>> signers,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/batch_create_envelopes'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'content': content,
+          'cc_email': ccEmail,
+          'cc_name': ccName,
+          'title': title,
+          'signers': signers,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (data is Map && data.containsKey('consent_url')) {
+        final url = Uri.parse(data['consent_url']);
+        if (await canLaunchUrl(url)) {
+          await launchUrl(url);
+        }
+        return null;
+      }
+
+      return data['envelope_ids'];
+    } catch (e) {
+      logger.e('Error creating envelopes: $e');
+      return null;
+    }
+  }
 }

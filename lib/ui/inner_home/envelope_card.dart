@@ -21,7 +21,7 @@ class EnvelopeCard extends StatelessWidget {
       case 'sent':
         return Colors.grey;
       default:
-        return Colors.yellow;
+        return Colors.orange;
     }
   }
 

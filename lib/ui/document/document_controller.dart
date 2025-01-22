@@ -1,19 +1,28 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:wolfie_sign/data/services/envelope_service.dart';
+import 'package:wolfie_sign/ui/home/home_controller.dart';
 import 'package:wolfie_sign/ui/profile/profile_controller.dart';
 
 class DocumentController extends GetxController {
+  final _firestore = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
+  final _envelopeService = EnvelopeService();
   final _group = Rxn<Map<String, dynamic>>();
   final bodyController = TextEditingController();
   final titleController = TextEditingController();
   final selectedTemplate = RxString('Custom');
   final _profileController = Get.find<ProfileController>();
+  final isSubmitting = false.obs;
 
   final htmlBody = RxString('');
 
   set group(Map<String, dynamic> value) {
     _group.value = value;
+    selectedTemplate.value = "Custom";
     _initializeHtmlBody();
   }
 
@@ -28,12 +37,12 @@ class DocumentController extends GetxController {
   }
 
   void _initializeHtmlBody() {
-    htmlBody.value = HtmlBody.buildTemplate(
+    updateHtmlBody(HtmlBody.buildTemplate(
       "Example Title",
       "",
       _profileController.userName.value,
       _profileController.userEmail.value,
-    );
+    ));
   }
 
   void selectTemplate(String template) {
@@ -42,35 +51,117 @@ class DocumentController extends GetxController {
     if (selectedTemplate.value == "GDPR") {
       bodyController.text = HtmlBody.getGDPRTemplate();
       titleController.text = "GDPR Consent Form";
-      htmlBody.value = HtmlBody.buildTemplate(
+      updateHtmlBody(HtmlBody.buildTemplate(
         titleController.text,
         bodyController.text,
         _profileController.userName.value,
         _profileController.userEmail.value,
-      );
+      ));
     } else {
       bodyController.clear();
       titleController.text = "Example Title";
-      htmlBody.value = HtmlBody.buildTemplate(
+
+      updateHtmlBody(HtmlBody.buildTemplate(
         titleController.text,
         bodyController.text,
         _profileController.userName.value,
         _profileController.userEmail.value,
-      );
+      ));
     }
   }
 
-  void onSubmit() {
-    print('Submitting document');
+  Future<void> onSubmit() async {
+    isSubmitting.value = true;
+
+    final signers = groupMembers
+        .map((member) => {
+              'signer_name': member['name'],
+              'signer_email': member['email'],
+            })
+        .toList();
+
+    final envelopeIds = await _envelopeService.createEnvelopes(
+      content: HtmlBody.buildTemplate(
+        titleController.text,
+        bodyController.text,
+        _profileController.userName.value,
+        _profileController.userEmail.value,
+        signeeEmail: "\$SIGNER_EMAIL\$",
+        signeeName: "\$SIGNER\$",
+      ),
+      ccEmail: _profileController.userEmail.value,
+      ccName: _profileController.userName.value,
+      title: titleController.text,
+      signers: signers,
+    );
+
+    if (envelopeIds != null) {
+      await _addEnvelopesToFirestore(envelopeIds, signers);
+      Get.find<HomeController>().navigateTo(1); // Navigate to inner home page
+    }
+
+    isSubmitting.value = false;
+  }
+
+  Future<void> _addEnvelopesToFirestore(
+      List<dynamic> envelopeIds, List<Map<String, dynamic>> signers) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return;
+
+    final docRef = _firestore.collection('documents').doc(userId);
+    final currentTime = DateTime.now().toIso8601String();
+
+    final newEnvelopes = List.generate(
+      envelopeIds.length,
+      (index) => {
+        'envelope_id': envelopeIds[index],
+        'sender_email': signers[index]['signer_email'],
+        'sender_name': signers[index]['signer_name'],
+        'status': 'sent',
+        'status_changed_date_time': currentTime,
+        'group_id': _group.value?['id'],
+        'doc_title': titleController.text,
+      },
+    );
+
+    final doc = await docRef.get();
+    List<dynamic> existingEnvelopes = [];
+    if (doc.exists) {
+      existingEnvelopes = List.from(doc.data()?['envelopes'] ?? []);
+    }
+
+    await docRef.set({
+      'envelopes': [...newEnvelopes, ...existingEnvelopes],
+    }, SetOptions(merge: true));
+  }
+
+  String preprocessText(String text) {
+    // Replace all occurrences of "SENDER" with the user's name
+    // Replace all occurences of "SENDER_EMAIL" with the user's email
+    // Replace all occurences of "SIGNER" with HTML element
+    // Replace all occurences of "SIGNER_EMAIL" with HTML element
+    text = text.replaceAll("\$SENDER\$", _profileController.userName.value);
+    text =
+        text.replaceAll("\$SENDER_EMAIL\$", _profileController.userEmail.value);
+    text = text.replaceAll("\$SIGNER\$",
+        """<span style="background-color:#ffff99">Signer Name</span>""");
+    text = text.replaceAll("\$SIGNER_EMAIL\$",
+        """<span style="background-color:#ffff99">Signer Email</span>""");
+    return text;
   }
 
   void updateHtmlBody(String text) {
-    htmlBody.value = HtmlBody.buildTemplate(
+    text = preprocessText(text);
+    htmlBody.value = text;
+  }
+
+  void updateRealTimeHtmlBody(String text) {
+    updateHtmlBody(htmlBody.value = HtmlBody.buildTemplate(
       titleController.text,
       text,
       _profileController.userName.value,
       _profileController.userEmail.value,
-    );
+    ));
   }
 
   void updateHtmlTitle(String text) {
@@ -129,7 +220,7 @@ class HtmlBody {
   }
 
   static String getGDPRTemplate() {
-    return "<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333;\">\n  <p>\n    This agreement (hereinafter referred to as the \"Agreement\") is made between \$SIGNER\$ (hereinafter referred to as the \"Data Subject\") and \$SENDER\$ (hereinafter referred to as the \"Data Controller\").\n  </p>\n\n  <p>\n    By signing this Agreement, the Data Subject gives explicit consent to the Data Controller to collect, process, and use their personal information in accordance with the General Data Protection Regulation (GDPR) of the European Union and applicable Romanian laws.\n  </p>\n\n  <p>\n    <strong>1. Purpose of Data Processing:</strong> The Data Subject consents to the processing of their personal data for the purposes explicitly stated by the Data Controller, including but not limited to [specify purposes, e.g., communication, service provision, marketing, etc.].\n  </p>\n\n  <p>\n    <strong>2. Types of Data Collected:</strong> The personal data to be collected and processed includes, but is not limited to, [specify data types, e.g., name, email address, phone number, etc.].\n  </p>\n\n  <p>\n    <strong>3. Data Retention:</strong> The Data Controller shall retain the personal data only for as long as necessary to fulfill the stated purposes or as required by applicable laws and regulations.\n  </p>\n\n  <p>\n    <strong>4. Rights of the Data Subject:</strong> The Data Subject has the following rights under GDPR:\n    <ul>\n      <li>The right to access their personal data and request copies of it.</li>\n      <li>The right to rectification of inaccurate or incomplete data.</li>\n      <li>The right to erasure of their personal data (\"right to be forgotten\"), subject to legal or contractual obligations.</li>\n      <li>The right to restrict processing of their personal data.</li>\n      <li>The right to data portability.</li>\n      <li>The right to object to the processing of their personal data for certain purposes.</li>\n      <li>The right to lodge a complaint with a supervisory authority.</li>\n    </ul>\n  </p>\n\n  <p>\n    <strong>5. Data Security:</strong> The Data Controller agrees to implement appropriate technical and organizational measures to ensure the security and confidentiality of the Data Subject's personal data.\n  </p>\n\n  <p>\n    <strong>6. Withdrawal of Consent:</strong> The Data Subject has the right to withdraw their consent at any time by notifying the Data Controller in writing. Withdrawal of consent does not affect the lawfulness of processing based on consent before its withdrawal.\n  </p>\n\n  <p>\n    <strong>7. Contact Information:</strong> For any inquiries or to exercise their rights, the Data Subject can contact the Data Controller at:\n    <br />\n    [Data Controller's Contact Details: e.g., address, email, phone number]\n  </p>\n\n  <p>\n    By agreeing to this document, the Data Subject acknowledges that they have read, understood, and agree to the terms outlined in this Agreement.\n  </p>\n</div>";
+    return "<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333;\">\n  <p>\n    This agreement (hereinafter referred to as the \"Agreement\") is made between \$SIGNER\$ (hereinafter referred to as the \"Data Subject\") and \$SENDER\$ (hereinafter referred to as the \"Data Controller\").\n  </p>\n\n  <p>\n    By signing this Agreement, the Data Subject gives explicit consent to the Data Controller to collect, process, and use their personal information in accordance with the General Data Protection Regulation (GDPR) of the European Union and applicable Romanian laws.\n  </p>\n\n  <p>\n    <strong>1. Purpose of Data Processing:</strong> The Data Subject consents to the processing of their personal data for the purposes explicitly stated by the Data Controller, including but not limited to [specify purposes, e.g., communication, service provision, marketing, etc.].\n  </p>\n\n  <p>\n    <strong>2. Types of Data Collected:</strong> The personal data to be collected and processed includes, but is not limited to, [specify data types, e.g., name, email address, phone number, etc.].\n  </p>\n\n  <p>\n    <strong>3. Data Retention:</strong> The Data Controller shall retain the personal data only for as long as necessary to fulfill the stated purposes or as required by applicable laws and regulations.\n  </p>\n\n  <p>\n    <strong>4. Rights of the Data Subject:</strong> The Data Subject has the following rights under GDPR:\n    <ul>\n      <li>The right to access their personal data and request copies of it.</li>\n      <li>The right to rectification of inaccurate or incomplete data.</li>\n      <li>The right to erasure of their personal data (\"right to be forgotten\"), subject to legal or contractual obligations.</li>\n      <li>The right to restrict processing of their personal data.</li>\n      <li>The right to data portability.</li>\n      <li>The right to object to the processing of their personal data for certain purposes.</li>\n      <li>The right to lodge a complaint with a supervisory authority.</li>\n    </ul>\n  </p>\n\n  <p>\n    <strong>5. Data Security:</strong> The Data Controller agrees to implement appropriate technical and organizational measures to ensure the security and confidentiality of the Data Subject's personal data.\n  </p>\n\n  <p>\n    <strong>6. Withdrawal of Consent:</strong> The Data Subject has the right to withdraw their consent at any time by notifying the Data Controller in writing. Withdrawal of consent does not affect the lawfulness of processing based on consent before its withdrawal.\n  </p>\n\n  <p>\n    <strong>7. Contact Information:</strong> For any inquiries or to exercise their rights, the Data Subject can contact the Data Controller at:\n    <br />\n    \$SENDER_EMAIL\$ \n  </p>\n\n  <p>\n    By agreeing to this document, the Data Subject acknowledges that they have read, understood, and agree to the terms outlined in this Agreement.\n  </p>\n</div>";
   }
 
   static String getTravelTemplate() {

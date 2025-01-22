@@ -93,6 +93,8 @@ class Eg002SigningViaEmailController:
         # Replace placeholders in content
         content = args.get("content", "CONTENT HERE")
         content = content.replace("$SIGNER$", args["signer_name"])
+        content = content.replace("$SIGNER_EMAIL$", args["signer_email"])
         content = content.replace("$SENDER$", args["cc_name"])
+        content = content.replace("$SENDER_EMAIL$", args["cc_email"])
 
         return content

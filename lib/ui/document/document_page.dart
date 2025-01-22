@@ -13,162 +13,177 @@ class DocumentPage extends GetView<DocumentController> {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isWideScreen = constraints.maxWidth > 1200;
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isWideScreen = constraints.maxWidth > 1200;
 
-            final contentSection = Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+                final contentSection = Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Sending to ${controller.groupName}",
-                        style: AppTextStyles.cardTitle),
-                    const SizedBox(width: 16),
-                    MemberAvatarsRow(members: controller.groupMembers),
+                    Row(
+                      children: [
+                        Text("Sending to ${controller.groupName}",
+                            style: AppTextStyles.cardTitle),
+                        const SizedBox(width: 16),
+                        MemberAvatarsRow(members: controller.groupMembers),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    const Text('Select Document Template',
+                        style: AppTextStyles.title),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Obx(() => _TemplateButton(
+                              label: 'Custom',
+                              isSelected:
+                                  controller.selectedTemplate.value == 'Custom',
+                              onTap: () => controller.selectTemplate('Custom'),
+                            )),
+                        const SizedBox(width: 16),
+                        Obx(() => _TemplateButton(
+                              label: 'GDPR',
+                              isSelected:
+                                  controller.selectedTemplate.value == 'GDPR',
+                              onTap: () => controller.selectTemplate('GDPR'),
+                            )),
+                        const SizedBox(width: 16),
+                        Obx(() => _TemplateButton(
+                              label: 'Travel',
+                              isSelected:
+                                  controller.selectedTemplate.value == 'Travel',
+                              onTap: () => controller.selectTemplate('Travel'),
+                            )),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    const Text('Document Title', style: AppTextStyles.title),
+                    const SizedBox(height: 16),
+                    TextField(
+                        controller: controller.titleController,
+                        onChanged: (newText) =>
+                            controller.updateHtmlTitle(newText),
+                        decoration: const InputDecoration(
+                          filled: true,
+                          fillColor: Color.fromARGB(255, 247, 247, 247),
+                          hintText: 'Example Title',
+                        )),
+                    const SizedBox(height: 16),
+                    const Text('Document Body', style: AppTextStyles.title),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          TextField(
+                              controller: controller.bodyController,
+                              maxLines: null,
+                              textAlign: TextAlign.start,
+                              expands: true,
+                              decoration: const InputDecoration(
+                                filled: true,
+                                fillColor: Color.fromARGB(255, 247, 247, 247),
+                              ),
+                              onChanged: (newText) =>
+                                  controller.updateRealTimeHtmlBody(newText)),
+                          Positioned(
+                            right: 8,
+                            bottom: 8,
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.primaryColor,
+                              ),
+                              margin: const EdgeInsets.all(16),
+                              child: IconButton(
+                                color: Colors.white,
+                                iconSize: 32,
+                                icon: const Icon(Icons.edit_document),
+                                onPressed: () => print('Transform'),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: controller.onSubmit,
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(0),
+                            )),
+                        child: const Text('Send Documents',
+                            style: AppTextStyles.body),
+                      ),
+                    ),
                   ],
-                ),
-                const SizedBox(height: 32),
-                const Text('Select Document Template',
-                    style: AppTextStyles.title),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Obx(() => _TemplateButton(
-                          label: 'Custom',
-                          isSelected:
-                              controller.selectedTemplate.value == 'Custom',
-                          onTap: () => controller.selectTemplate('Custom'),
-                        )),
-                    const SizedBox(width: 16),
-                    Obx(() => _TemplateButton(
-                          label: 'GDPR',
-                          isSelected:
-                              controller.selectedTemplate.value == 'GDPR',
-                          onTap: () => controller.selectTemplate('GDPR'),
-                        )),
-                    const SizedBox(width: 16),
-                    Obx(() => _TemplateButton(
-                          label: 'Travel',
-                          isSelected:
-                              controller.selectedTemplate.value == 'Travel',
-                          onTap: () => controller.selectTemplate('Travel'),
-                        )),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                const Text('Document Title', style: AppTextStyles.title),
-                const SizedBox(height: 16),
-                TextField(
-                    controller: controller.titleController,
-                    onChanged: (newText) => controller.updateHtmlTitle(newText),
-                    decoration: const InputDecoration(
-                      filled: true,
-                      fillColor: Color.fromARGB(255, 247, 247, 247),
-                      hintText: 'Example Title',
-                    )),
-                const SizedBox(height: 16),
-                const Text('Document Body', style: AppTextStyles.title),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      TextField(
-                          controller: controller.bodyController,
-                          maxLines: null,
-                          textAlign: TextAlign.start,
-                          expands: true,
-                          decoration: const InputDecoration(
-                            filled: true,
-                            fillColor: Color.fromARGB(255, 247, 247, 247),
-                          ),
-                          onChanged: (newText) =>
-                              controller.updateHtmlBody(newText)),
-                      Positioned(
-                        right: 8,
-                        bottom: 8,
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColors.primaryColor,
-                          ),
-                          margin: const EdgeInsets.all(16),
-                          child: IconButton(
-                            color: Colors.white,
-                            iconSize: 32,
-                            icon: const Icon(Icons.edit_document),
-                            onPressed: () => print('Transform'),
-                          ),
-                        ),
+                );
+
+                final previewSection = Container(
+                  width: isWideScreen ? 595 : double.infinity,
+                  height: isWideScreen ? 842 : 500,
+                  margin: EdgeInsets.only(
+                      left: isWideScreen ? 16 : 0, top: isWideScreen ? 0 : 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 20,
+                        offset: const Offset(0, 4),
+                        spreadRadius: 2,
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: controller.onSubmit,
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(0),
+                  child: SingleChildScrollView(
+                    child: Obx(() => HtmlWidget(
+                          controller.htmlBody.value,
+                          textStyle: AppTextStyles.normal16Gray05,
                         )),
-                    child:
-                        const Text('Send Documents', style: AppTextStyles.body),
                   ),
-                ),
-              ],
-            );
-
-            final previewSection = Container(
-              width: isWideScreen ? 595 : double.infinity,
-              height: isWideScreen ? 842 : 500,
-              margin: EdgeInsets.only(
-                  left: isWideScreen ? 16 : 0, top: isWideScreen ? 0 : 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, 4),
-                    spreadRadius: 2,
+                );
+                if (isWideScreen) {
+                  return Row(
+                    children: [
+                      Expanded(child: contentSection),
+                      previewSection,
+                    ],
+                  );
+                }
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: constraints.maxHeight - 48,
+                        child: contentSection,
+                      ),
+                      previewSection,
+                    ],
                   ),
-                ],
-              ),
-              child: SingleChildScrollView(
-                child: Obx(() => HtmlWidget(
-                      controller.htmlBody.value,
-                      textStyle: AppTextStyles.normal16Gray05,
-                    )),
-              ),
-            );
-            if (isWideScreen) {
-              return Row(
-                children: [
-                  Expanded(child: contentSection),
-                  previewSection,
-                ],
-              );
-            }
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: constraints.maxHeight - 48,
-                    child: contentSection,
+                );
+              },
+            ),
+          ),
+          Obx(() => controller.isSubmitting.value
+              ? Container(
+                  color: Colors.black54,
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                    ),
                   ),
-                  previewSection,
-                ],
-              ),
-            );
-          },
-        ),
+                )
+              : const SizedBox()),
+        ],
       ),
     );
   }
