@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from docusign_esign import ApiClient
 from docusign_esign.client.api_exception import ApiException
 from app.eSignature.examples.doc_info import Eg004EnvelopeInfoController
@@ -9,6 +10,7 @@ from app.eSignature.examples.email_sign import (
 from app.jwt_config import DS_JWT
 
 app = Flask(__name__)
+CORS(app)
 
 SCOPES = ["signature", "impersonation"]
 
