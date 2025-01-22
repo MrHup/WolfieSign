@@ -7,10 +7,10 @@ import 'package:wolfie_sign/ui/profile/profile_controller.dart';
 
 class DependencyCreator {
   static init() {
-    Get.put(LoginController());
+    Get.put(ProfileController(), permanent: true);
     Get.put(GroupsController(), permanent: true);
     Get.put(DocumentController(), permanent: true);
-    Get.put(ProfileController(), permanent: true);
     Get.put(InnerHomeController(), permanent: true);
+    Get.put(LoginController());
   }
 }

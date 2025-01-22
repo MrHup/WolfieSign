@@ -24,7 +24,8 @@ class DocumentPage extends GetView<DocumentController> {
               children: [
                 Row(
                   children: [
-                    Text(controller.groupName, style: AppTextStyles.cardTitle),
+                    Text("Sending to ${controller.groupName}",
+                        style: AppTextStyles.cardTitle),
                     const SizedBox(width: 16),
                     MemberAvatarsRow(members: controller.groupMembers),
                   ],
@@ -117,7 +118,8 @@ class DocumentPage extends GetView<DocumentController> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(0),
                         )),
-                    child: const Text('Submit', style: AppTextStyles.body),
+                    child:
+                        const Text('Send Documents', style: AppTextStyles.body),
                   ),
                 ),
               ],

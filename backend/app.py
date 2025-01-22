@@ -223,5 +223,80 @@ def get_batch_envelope_status():
         return jsonify({"error": str(err)}), 500
 
 
+@app.route("/batch_create_envelopes", methods=["POST"])
+def create_batch_envelopes():
+    try:
+        data = request.json
+        signers = data.get("signers", [])
+
+        if not signers:
+            return jsonify({"error": "No signers provided"}), 400
+
+        # Initialize API client
+        api_client = ApiClient()
+        api_client.set_base_path(DS_JWT["authorization_server"])
+        api_client.set_oauth_host_name(DS_JWT["authorization_server"])
+
+        # Get private key and token
+        private_key = (
+            get_private_key(DS_JWT["private_key_file"]).encode("ascii").decode("utf-8")
+        )
+        jwt_values = get_token(private_key, api_client)
+
+        # Prepare base envelope args
+        base_envelope_args = {
+            "cc_email": data["cc_email"],
+            "cc_name": data["cc_name"],
+            "title": data["title"],
+            "content": data["content"],
+            "status": "sent",
+        }
+
+        # Prepare base args for the controller
+        base_args = {
+            "account_id": jwt_values["api_account_id"],
+            "base_path": jwt_values["base_path"],
+            "access_token": jwt_values["access_token"],
+        }
+
+        # Process each signer and collect envelope IDs
+        results = []
+        for signer in signers:
+            envelope_args = {
+                **base_envelope_args,
+                "signer_email": signer["signer_email"],
+                "signer_name": signer["signer_name"],
+            }
+
+            args = {**base_args, "envelope_args": envelope_args}
+            result = Eg002SigningViaEmailController.worker(args)
+            results.append(result["envelope_id"])
+
+        return jsonify({"envelope_ids": results})
+
+    except ApiException as err:
+        body = err.body.decode("utf8")
+        if "consent_required" in body:
+            url_scopes = "+".join(SCOPES)
+            redirect_uri = "https://developers.docusign.com/platform/auth/consent"
+            consent_url = (
+                f"https://{DS_JWT['authorization_server']}/oauth/auth?response_type=code&"
+                f"scope={url_scopes}&client_id={DS_JWT['ds_client_id']}&redirect_uri={redirect_uri}"
+            )
+
+            return (
+                jsonify(
+                    {
+                        "error": "consent_required",
+                        "consent_url": consent_url,
+                        "message": "Please visit the consent_url to grant consent, then try the request again",
+                    }
+                ),
+                403,
+            )
+
+        return jsonify({"error": str(err)}), 500
+
+
 if __name__ == "__main__":
     app.run(port=5000)

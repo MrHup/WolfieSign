@@ -92,34 +92,7 @@ class Eg002SigningViaEmailController:
 
         # Replace placeholders in content
         content = args.get("content", "CONTENT HERE")
-        content = content.replace("$SIGNER1$", args["signer_name"])
-        content = content.replace("$SIGNER2$", args["cc_name"])
+        content = content.replace("$SIGNER$", args["signer_name"])
+        content = content.replace("$SENDER$", args["cc_name"])
 
-        return f"""
-    <!DOCTYPE html>
-    <html>
-        <head>
-          <meta charset="UTF-8">
-        </head>
-        <body style="font-family:sans-serif;margin:0;">
-        <div style="background-color: #416AFF; padding: 1em; width: 100%; margin-bottom: 2em;">
-            <div style="text-align: right; margin-right: 2em;">
-                <img src="https://i.imgur.com/VO5nMRp.png" alt="Logo" style="width:150px;">
-            </div>
-        </div>
-        <div style="margin-left:2em;">
-            <h3 style="font-family: 'Trebuchet MS', Helvetica, sans-serif; font-size: 1em;
-                color: #001D4B;margin-bottom: 0;">WolfieSign Document</h3>
-            <h1 style="font-family: 'Trebuchet MS', Helvetica, sans-serif;
-              margin-top: 0px;margin-bottom: 3.5em;
-              color: #001D4B;">{args.get('title', 'TITLE HERE')}</h1>
-            <h4>Ordered by {args["signer_name"]}</h4>
-            <p style="margin-top:0em; margin-bottom:0em;">Email: {args["signer_email"]}</p>
-            <p style="margin-top:0em; margin-bottom:0em;">Copy to: {args["cc_name"]}, {args["cc_email"]}</p>
-            {content}
-            <h3 style="margin-top:3em;">Signature: <span style="color:white;">**signature_1**/</span></h3>
-            <h2 style="margin-top:3em;">Date: {current_date}</h2>
-        </div>
-        </body>
-    </html>
-    """
+        return content

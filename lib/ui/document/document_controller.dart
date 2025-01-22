@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:wolfie_sign/ui/profile/profile_controller.dart';
 
 class DocumentController extends GetxController {
   final _group = Rxn<Map<String, dynamic>>();
   final bodyController = TextEditingController();
   final titleController = TextEditingController();
   final selectedTemplate = RxString('Custom');
+  final _profileController = Get.find<ProfileController>();
 
-  final htmlBody = RxString(HtmlBody.buildTemplate(
-      "Example Title", "", "CurrentUser", "CurrentEmail"));
+  final htmlBody = RxString('');
 
-  set group(Map<String, dynamic> value) => _group.value = value;
+  set group(Map<String, dynamic> value) {
+    _group.value = value;
+    _initializeHtmlBody();
+  }
+
   String get groupName => _group.value?['name'] ?? '';
   List<dynamic> get groupMembers => _group.value?['members'] ?? [];
 
@@ -20,6 +25,15 @@ class DocumentController extends GetxController {
     bodyController.dispose();
     titleController.dispose();
     super.onClose();
+  }
+
+  void _initializeHtmlBody() {
+    htmlBody.value = HtmlBody.buildTemplate(
+      "Example Title",
+      "",
+      _profileController.userName.value,
+      _profileController.userEmail.value,
+    );
   }
 
   void selectTemplate(String template) {
@@ -31,17 +45,17 @@ class DocumentController extends GetxController {
       htmlBody.value = HtmlBody.buildTemplate(
         titleController.text,
         bodyController.text,
-        "CurrentUser",
-        "CurrentEmail",
+        _profileController.userName.value,
+        _profileController.userEmail.value,
       );
     } else {
       bodyController.clear();
-      titleController.clear();
+      titleController.text = "Example Title";
       htmlBody.value = HtmlBody.buildTemplate(
         titleController.text,
         bodyController.text,
-        "CurrentUser",
-        "CurrentEmail",
+        _profileController.userName.value,
+        _profileController.userEmail.value,
       );
     }
   }
@@ -50,14 +64,22 @@ class DocumentController extends GetxController {
     print('Submitting document');
   }
 
-  void updateHtmlBody(text) {
+  void updateHtmlBody(String text) {
     htmlBody.value = HtmlBody.buildTemplate(
-        titleController.text, text, "CurrentUser", "CurrentEmail");
+      titleController.text,
+      text,
+      _profileController.userName.value,
+      _profileController.userEmail.value,
+    );
   }
 
-  void updateHtmlTitle(text) {
+  void updateHtmlTitle(String text) {
     htmlBody.value = HtmlBody.buildTemplate(
-        text, bodyController.text, "CurrentUser", "CurrentEmail");
+      text,
+      bodyController.text,
+      _profileController.userName.value,
+      _profileController.userEmail.value,
+    );
   }
 }
 
@@ -100,15 +122,14 @@ class HtmlBody {
   static String getInfoSigners(
       signeeName, signeeEmail, requesterName, requesterEmail) {
     return """
-            <p style="margin-top:0em; font-size: 0.8em; margin-bottom:0em;"> Requested for: $signeeName</p>
-            <p style="margin-top:0em; font-size: 0.8em; margin-bottom:0em;">Email: $signeeEmail</p>
-            <p style="margin-top:0em; font-size: 0.8em; margin-bottom:0em;">Copy to: $requesterName, $requesterEmail</p></p>
+            <p style="margin-top:0em; font-size: 0.8em; margin-bottom:0em;"> Requested for: $signeeName, $signeeEmail</p>
+            <p style="margin-top:0em; font-size: 0.8em; margin-bottom:0em;">Requested by: $requesterName, $requesterEmail</p></p>
             <div style="color: #001D4B;">
   """;
   }
 
   static String getGDPRTemplate() {
-    return "<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333;\">\n  <p>\n    This agreement (hereinafter referred to as the \"Agreement\") is made between \$SIGNER1\$ (hereinafter referred to as the \"Data Subject\") and \$SIGNER2\$ (hereinafter referred to as the \"Data Controller\").\n  </p>\n\n  <p>\n    By signing this Agreement, the Data Subject gives explicit consent to the Data Controller to collect, process, and use their personal information in accordance with the General Data Protection Regulation (GDPR) of the European Union and applicable Romanian laws.\n  </p>\n\n  <p>\n    <strong>1. Purpose of Data Processing:</strong> The Data Subject consents to the processing of their personal data for the purposes explicitly stated by the Data Controller, including but not limited to [specify purposes, e.g., communication, service provision, marketing, etc.].\n  </p>\n\n  <p>\n    <strong>2. Types of Data Collected:</strong> The personal data to be collected and processed includes, but is not limited to, [specify data types, e.g., name, email address, phone number, etc.].\n  </p>\n\n  <p>\n    <strong>3. Data Retention:</strong> The Data Controller shall retain the personal data only for as long as necessary to fulfill the stated purposes or as required by applicable laws and regulations.\n  </p>\n\n  <p>\n    <strong>4. Rights of the Data Subject:</strong> The Data Subject has the following rights under GDPR:\n    <ul>\n      <li>The right to access their personal data and request copies of it.</li>\n      <li>The right to rectification of inaccurate or incomplete data.</li>\n      <li>The right to erasure of their personal data (\"right to be forgotten\"), subject to legal or contractual obligations.</li>\n      <li>The right to restrict processing of their personal data.</li>\n      <li>The right to data portability.</li>\n      <li>The right to object to the processing of their personal data for certain purposes.</li>\n      <li>The right to lodge a complaint with a supervisory authority.</li>\n    </ul>\n  </p>\n\n  <p>\n    <strong>5. Data Security:</strong> The Data Controller agrees to implement appropriate technical and organizational measures to ensure the security and confidentiality of the Data Subject's personal data.\n  </p>\n\n  <p>\n    <strong>6. Withdrawal of Consent:</strong> The Data Subject has the right to withdraw their consent at any time by notifying the Data Controller in writing. Withdrawal of consent does not affect the lawfulness of processing based on consent before its withdrawal.\n  </p>\n\n  <p>\n    <strong>7. Contact Information:</strong> For any inquiries or to exercise their rights, the Data Subject can contact the Data Controller at:\n    <br />\n    [Data Controller's Contact Details: e.g., address, email, phone number]\n  </p>\n\n  <p>\n    By agreeing to this document, the Data Subject acknowledges that they have read, understood, and agree to the terms outlined in this Agreement.\n  </p>\n</div>";
+    return "<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333;\">\n  <p>\n    This agreement (hereinafter referred to as the \"Agreement\") is made between \$SIGNER\$ (hereinafter referred to as the \"Data Subject\") and \$SENDER\$ (hereinafter referred to as the \"Data Controller\").\n  </p>\n\n  <p>\n    By signing this Agreement, the Data Subject gives explicit consent to the Data Controller to collect, process, and use their personal information in accordance with the General Data Protection Regulation (GDPR) of the European Union and applicable Romanian laws.\n  </p>\n\n  <p>\n    <strong>1. Purpose of Data Processing:</strong> The Data Subject consents to the processing of their personal data for the purposes explicitly stated by the Data Controller, including but not limited to [specify purposes, e.g., communication, service provision, marketing, etc.].\n  </p>\n\n  <p>\n    <strong>2. Types of Data Collected:</strong> The personal data to be collected and processed includes, but is not limited to, [specify data types, e.g., name, email address, phone number, etc.].\n  </p>\n\n  <p>\n    <strong>3. Data Retention:</strong> The Data Controller shall retain the personal data only for as long as necessary to fulfill the stated purposes or as required by applicable laws and regulations.\n  </p>\n\n  <p>\n    <strong>4. Rights of the Data Subject:</strong> The Data Subject has the following rights under GDPR:\n    <ul>\n      <li>The right to access their personal data and request copies of it.</li>\n      <li>The right to rectification of inaccurate or incomplete data.</li>\n      <li>The right to erasure of their personal data (\"right to be forgotten\"), subject to legal or contractual obligations.</li>\n      <li>The right to restrict processing of their personal data.</li>\n      <li>The right to data portability.</li>\n      <li>The right to object to the processing of their personal data for certain purposes.</li>\n      <li>The right to lodge a complaint with a supervisory authority.</li>\n    </ul>\n  </p>\n\n  <p>\n    <strong>5. Data Security:</strong> The Data Controller agrees to implement appropriate technical and organizational measures to ensure the security and confidentiality of the Data Subject's personal data.\n  </p>\n\n  <p>\n    <strong>6. Withdrawal of Consent:</strong> The Data Subject has the right to withdraw their consent at any time by notifying the Data Controller in writing. Withdrawal of consent does not affect the lawfulness of processing based on consent before its withdrawal.\n  </p>\n\n  <p>\n    <strong>7. Contact Information:</strong> For any inquiries or to exercise their rights, the Data Subject can contact the Data Controller at:\n    <br />\n    [Data Controller's Contact Details: e.g., address, email, phone number]\n  </p>\n\n  <p>\n    By agreeing to this document, the Data Subject acknowledges that they have read, understood, and agree to the terms outlined in this Agreement.\n  </p>\n</div>";
   }
 
   static String getTravelTemplate() {
