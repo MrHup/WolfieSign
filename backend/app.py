@@ -153,5 +153,73 @@ def get_envelope_status(envelope_id):
         return jsonify({"error": str(err)}), 500
 
 
+@app.route("/batch_envelope_status", methods=["POST"])
+def get_batch_envelope_status():
+    try:
+        data = request.json
+        envelope_ids = data.get("envelope_ids", [])
+
+        if not envelope_ids:
+            return jsonify({"error": "No envelope IDs provided"}), 400
+
+        # Initialize API client
+        api_client = ApiClient()
+        api_client.set_base_path(DS_JWT["authorization_server"])
+        api_client.set_oauth_host_name(DS_JWT["authorization_server"])
+
+        # Get private key and token
+        private_key = (
+            get_private_key(DS_JWT["private_key_file"]).encode("ascii").decode("utf-8")
+        )
+        jwt_values = get_token(private_key, api_client)
+
+        # Prepare base args for the controller
+        base_args = {
+            "account_id": jwt_values["api_account_id"],
+            "base_path": jwt_values["base_path"],
+            "access_token": jwt_values["access_token"],
+        }
+
+        # Process each envelope ID and collect results
+        results = []
+        for envelope_id in envelope_ids:
+            args = {**base_args, "envelope_id": envelope_id}
+            result = Eg004EnvelopeInfoController.worker(args)
+
+            filtered_response = {
+                "envelope_id": envelope_id,
+                "sender_email": result.sender.email,
+                "sender_name": result.sender.user_name,
+                "status": result.status,
+                "status_changed_date_time": result.status_changed_date_time,
+            }
+            results.append(filtered_response)
+
+        return jsonify(results)
+
+    except ApiException as err:
+        body = err.body.decode("utf8")
+        if "consent_required" in body:
+            url_scopes = "+".join(SCOPES)
+            redirect_uri = "https://developers.docusign.com/platform/auth/consent"
+            consent_url = (
+                f"https://{DS_JWT['authorization_server']}/oauth/auth?response_type=code&"
+                f"scope={url_scopes}&client_id={DS_JWT['ds_client_id']}&redirect_uri={redirect_uri}"
+            )
+
+            return (
+                jsonify(
+                    {
+                        "error": "consent_required",
+                        "consent_url": consent_url,
+                        "message": "Please visit the consent_url to grant consent, then try the request again",
+                    }
+                ),
+                403,
+            )
+
+        return jsonify({"error": str(err)}), 500
+
+
 if __name__ == "__main__":
     app.run(port=5000)
