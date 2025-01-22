@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wolfie_sign/data/models/envelope_model.dart';
 import 'package:wolfie_sign/data/services/envelope_service.dart';
 import 'package:wolfie_sign/utils/logger.dart';
@@ -11,11 +12,27 @@ class InnerHomeController extends GetxController {
   final _envelopeService = EnvelopeService();
   final envelopes = <EnvelopeModel>[].obs;
   final isRefreshing = false.obs;
+  final isLoading = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     _listenToEnvelopes();
+  }
+
+  Future<void> loadInitialData() async {
+    isLoading.value = true;
+    final userId = _auth.currentUser?.uid;
+    if (userId != null) {
+      final doc = await _firestore.collection('documents').doc(userId).get();
+      if (doc.exists && doc.data()?['envelopes'] != null) {
+        final envelopesList =
+            List<Map<String, dynamic>>.from(doc.data()?['envelopes'] ?? []);
+        envelopes.value =
+            envelopesList.map((e) => EnvelopeModel.fromJson(e)).toList();
+      }
+    }
+    isLoading.value = false;
   }
 
   Future<void> refreshEnvelopes() async {
@@ -84,7 +101,12 @@ class InnerHomeController extends GetxController {
     }
   }
 
-  void onEnvelopeTap(String envelopeId) {
-    logger.d('Envelope tapped: $envelopeId');
+  void onEnvelopeTap(String envelopeId) async {
+    final url = Uri.parse(
+        'https://demo.docusign.net/Signing/EmailStart.aspx?m=$envelopeId');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    }
+    logger.d('Launching envelope URL: $url');
   }
 }

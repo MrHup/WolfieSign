@@ -110,7 +110,16 @@ class LoginPage extends GetView<LoginController> {
               ),
             ),
           ),
-
+          Obx(() => controller.isLoading.value
+              ? Container(
+                  color: Colors.black54,
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+              : const SizedBox()),
           // Powered by section
           Positioned(
             right: 16,

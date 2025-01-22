@@ -16,6 +16,7 @@ class GroupsController extends GetxController {
   List get groups => _groups;
   final _selectedGroup = Rxn<Map<String, dynamic>>();
   Map<String, dynamic>? get selectedGroup => _selectedGroup.value;
+  final isLoading = false.obs;
 
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
@@ -35,6 +36,18 @@ class GroupsController extends GetxController {
     memberNameController.dispose();
     memberEmailController.dispose();
     super.onClose();
+  }
+
+  Future<void> loadInitialData() async {
+    isLoading.value = true;
+    final userId = _auth.currentUser?.uid;
+    if (userId != null) {
+      final doc = await _firestore.collection('email-list').doc(userId).get();
+      if (doc.exists && doc.data()?['groups'] != null) {
+        _groups.value = List.from(doc.data()?['groups'] ?? []);
+      }
+    }
+    isLoading.value = false;
   }
 
   void showAddGroupModal() {

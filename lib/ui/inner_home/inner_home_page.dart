@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:wolfie_sign/ui/inner_home/envelope_card.dart';
 import 'package:wolfie_sign/ui/inner_home/inner_home_controller.dart';
 import 'package:wolfie_sign/utils/app_colors.dart';
+import 'package:wolfie_sign/utils/app_text_styles.dart';
 
 class InnerHomePage extends GetView<InnerHomeController> {
   const InnerHomePage({super.key});
@@ -11,15 +12,29 @@ class InnerHomePage extends GetView<InnerHomeController> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        ListView.builder(
-          itemCount: controller.envelopes.length,
-          itemBuilder: (context, index) {
-            final envelope = controller.envelopes[index];
-            return EnvelopeCard(
-              envelope: envelope,
-              onTap: () => controller.onEnvelopeTap(envelope.envelopeId),
-            );
-          },
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                "Your Last Documents",
+                style: AppTextStyles.title,
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: controller.envelopes.length,
+                itemBuilder: (context, index) {
+                  final envelope = controller.envelopes[index];
+                  return EnvelopeCard(
+                    envelope: envelope,
+                    onTap: () => controller.onEnvelopeTap(envelope.envelopeId),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
         Positioned(
           left: 16,
