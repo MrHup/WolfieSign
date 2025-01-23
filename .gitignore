@@ -8,6 +8,7 @@ private.key
 firebase_options.dart
 
 # Miscellaneous
+secrets.dart
 *.class
 *.log
 *.pyc

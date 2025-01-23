@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -5,8 +7,11 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:wolfie_sign/data/services/envelope_service.dart';
+import 'package:wolfie_sign/data/services/openai_service.dart';
+import 'package:wolfie_sign/ui/document/modify_document_modal.dart';
 import 'package:wolfie_sign/ui/home/home_controller.dart';
 import 'package:wolfie_sign/ui/profile/profile_controller.dart';
+import 'package:wolfie_sign/utils/app_colors.dart';
 
 class DocumentController extends GetxController {
   final _firestore = FirebaseFirestore.instance;
@@ -15,8 +20,10 @@ class DocumentController extends GetxController {
   final _group = Rxn<Map<String, dynamic>>();
   final bodyController = TextEditingController();
   final titleController = TextEditingController();
+  final promptController = TextEditingController();
   final selectedTemplate = RxString('Custom');
   final _profileController = Get.find<ProfileController>();
+  final _openAIService = OpenAIService();
   final isSubmitting = false.obs;
 
   final htmlBody = RxString('');
@@ -34,6 +41,7 @@ class DocumentController extends GetxController {
   void onClose() {
     bodyController.dispose();
     titleController.dispose();
+    promptController.dispose();
     super.onClose();
   }
 
@@ -44,6 +52,43 @@ class DocumentController extends GetxController {
       _profileController.userName.value,
       _profileController.userEmail.value,
     ));
+  }
+
+  void showModifyDocumentModal() {
+    promptController.clear();
+    Get.dialog(
+      BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+        child: Container(
+          color: AppColors.backdropColor,
+          child: ModifyDocumentModal(
+            promptController: promptController,
+            onSubmit: () => _handleModifyDocument(),
+            onCancel: () => Get.back(),
+          ),
+        ),
+      ),
+      barrierColor: Colors.transparent,
+    );
+  }
+
+  void _handleModifyDocument() async {
+    if (promptController.text.isEmpty) return;
+
+    Get.context!.loaderOverlay.show();
+
+    final newContent = await _openAIService.generateDocumentContent(
+      promptController.text,
+      bodyController.text,
+    );
+
+    if (newContent != null) {
+      bodyController.text = newContent;
+      updateHtmlBody(newContent);
+    }
+
+    Get.back();
+    Get.context!.loaderOverlay.hide();
   }
 
   void selectTemplate(String template) {

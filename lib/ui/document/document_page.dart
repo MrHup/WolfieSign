@@ -103,7 +103,7 @@ class DocumentPage extends GetView<DocumentController> {
                                 color: Colors.white,
                                 iconSize: 32,
                                 icon: const Icon(Icons.edit_document),
-                                onPressed: () => print('Transform'),
+                                onPressed: controller.showModifyDocumentModal,
                               ),
                             ),
                           ),
@@ -173,16 +173,6 @@ class DocumentPage extends GetView<DocumentController> {
               },
             ),
           ),
-          Obx(() => controller.isSubmitting.value
-              ? Container(
-                  color: Colors.black54,
-                  child: const Center(
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                    ),
-                  ),
-                )
-              : const SizedBox()),
         ],
       ),
     );
