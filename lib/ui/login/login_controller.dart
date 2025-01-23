@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:wolfie_sign/ui/groups/groups_controller.dart';
 import 'package:wolfie_sign/ui/inner_home/inner_home_controller.dart';
 import 'package:wolfie_sign/ui/profile/profile_controller.dart';
@@ -27,6 +28,7 @@ class LoginController extends GetxController {
 
   Future<void> handleSignIn() async {
     isLoading.value = true;
+    Get.context!.loaderOverlay.show();
     try {
       final userCredential = await _auth.signInWithEmailAndPassword(
         email: emailController.text.trim(),
@@ -50,6 +52,7 @@ class LoginController extends GetxController {
       );
     } finally {
       isLoading.value = false;
+      Get.context!.loaderOverlay.hide();
     }
   }
 }

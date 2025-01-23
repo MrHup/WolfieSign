@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:wolfie_sign/data/services/envelope_service.dart';
 import 'package:wolfie_sign/ui/home/home_controller.dart';
 import 'package:wolfie_sign/ui/profile/profile_controller.dart';
@@ -71,6 +72,7 @@ class DocumentController extends GetxController {
   }
 
   Future<void> onSubmit() async {
+    Get.context!.loaderOverlay.show();
     isSubmitting.value = true;
 
     final signers = groupMembers
@@ -101,6 +103,7 @@ class DocumentController extends GetxController {
     }
 
     isSubmitting.value = false;
+    Get.context!.loaderOverlay.hide();
   }
 
   Future<void> _addEnvelopesToFirestore(

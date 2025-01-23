@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:rive/rive.dart';
 import 'package:wolfie_sign/firebase_options.dart';
 import 'package:wolfie_sign/ui/document/document_page.dart';
 import 'package:wolfie_sign/ui/home/home_binding.dart';
@@ -20,7 +21,14 @@ class App extends StatelessWidget {
       overlayWidgetBuilder: (_) {
         return const Center(
           child: SizedBox(
-              width: 270, height: 270, child: Center(child: Text("Loading"))),
+            width: 270,
+            height: 270,
+            child: Center(
+              child: RiveAnimation.asset(
+                'assets/animations/wolf.riv',
+              ),
+            ),
+          ),
         );
       },
       child: GetMaterialApp(

@@ -69,7 +69,7 @@ class AddMemberModal extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(0),
                         )),
-                    child: const Text('Add'),
+                    child: const Text('Add', style: AppTextStyles.body),
                   ),
                 ],
               ),
