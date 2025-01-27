@@ -103,6 +103,15 @@ class DocumentController extends GetxController {
         _profileController.userName.value,
         _profileController.userEmail.value,
       ));
+    } else if (selectedTemplate.value == "Travel") {
+      bodyController.text = HtmlBody.getTravelTemplate();
+      titleController.text = "Travel Agreement";
+      updateHtmlBody(HtmlBody.buildTemplate(
+        titleController.text,
+        bodyController.text,
+        _profileController.userName.value,
+        _profileController.userEmail.value,
+      ));
     } else {
       bodyController.clear();
       titleController.text = "Example Title";
@@ -272,7 +281,63 @@ class HtmlBody {
   }
 
   static String getTravelTemplate() {
-    return "";
+    return "<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333;\">\n" +
+        "  <p>\n" +
+        "    This travel agreement (hereinafter referred to as the \"Agreement\") is made between <span>\$SIGNER\$</span> (hereinafter referred to as the \"Child\" or \"Participant\") and <span>\$SENDER\$</span> (hereinafter referred to as the \"NGO Representative\").\n" +
+        "  </p>\n" +
+        "\n" +
+        "  <p>\n" +
+        "    By signing this Agreement, the Child and their legal guardian(s) consent to the Child's participation in the travel activities organized by the NGO Representative, under the terms and conditions outlined below.\n" +
+        "  </p>\n" +
+        "\n" +
+        "  <p>\n" +
+        "    <strong>1. Purpose of Travel:</strong> The purpose of this travel is to <span style=\"background-color: #FFCCCB;\">[specify purpose, e.g., participate in an educational program, attend a cultural exchange, etc.]</span>. The NGO Representative agrees to ensure the safety and well-being of the Child during the trip.\n" +
+        "  </p>\n" +
+        "\n" +
+        "  <p>\n" +
+        "    <strong>2. Travel Details:</strong> The travel will take place from <span style=\"background-color: #FFCCCB;\">[start date]</span> to <span style=\"background-color: #FFCCCB;\">[end date]</span>. The destination(s) include <span style=\"background-color: #FFCCCB;\">[list destinations]</span>. The NGO Representative will provide transportation, accommodation, and meals as follows: <span style=\"background-color: #FFCCCB;\">[specify details]</span>.\n" +
+        "  </p>\n" +
+        "\n" +
+        "  <p>\n" +
+        "    <strong>3. Responsibilities of the NGO Representative:</strong> The NGO Representative agrees to:\n" +
+        "    <ul>\n" +
+        "      <li>Ensure the safety and supervision of the Child at all times during the trip.</li>\n" +
+        "      <li>Provide necessary medical assistance in case of emergencies, after obtaining consent from the Child's legal guardian(s).</li>\n" +
+        "      <li>Communicate regularly with the Child's legal guardian(s) regarding the Child's well-being and any significant updates.</li>\n" +
+        "    </ul>\n" +
+        "  </p>\n" +
+        "\n" +
+        "  <p>\n" +
+        "    <strong>4. Responsibilities of the Child and Legal Guardian(s):</strong> The Child and their legal guardian(s) agree to:\n" +
+        "    <ul>\n" +
+        "      <li>Provide accurate and complete information about the Child's health, dietary requirements, and any special needs.</li>\n" +
+        "      <li>Ensure the Child follows the rules and guidelines set by the NGO Representative during the trip.</li>\n" +
+        "      <li>Cover any additional expenses not included in the travel arrangements, such as personal purchases or optional activities.</li>\n" +
+        "    </ul>\n" +
+        "  </p>\n" +
+        "\n" +
+        "  <p>\n" +
+        "    <strong>5. Emergency Contact:</strong> In case of an emergency, the NGO Representative will contact the Child's legal guardian(s) at the following number: <span style=\"background-color: #FFCCCB;\">[emergency contact number]</span>.\n" +
+        "  </p>\n" +
+        "\n" +
+        "  <p>\n" +
+        "    <strong>6. Liability:</strong> The NGO Representative shall not be held liable for any injuries, accidents, or damages that occur due to the Child's failure to follow instructions or rules during the trip. However, the NGO Representative will take all reasonable measures to ensure the Child's safety.\n" +
+        "  </p>\n" +
+        "\n" +
+        "  <p>\n" +
+        "    <strong>7. Withdrawal from the Trip:</strong> The Child's legal guardian(s) may withdraw the Child from the trip at any time by notifying the NGO Representative in writing. In such cases, any non-refundable expenses incurred will be the responsibility of the legal guardian(s).\n" +
+        "  </p>\n" +
+        "\n" +
+        "  <p>\n" +
+        "    <strong>8. Contact Information:</strong> For any inquiries or concerns, the Child's legal guardian(s) can contact the NGO Representative at:\n" +
+        "    <br />\n" +
+        "    <span>\$SENDER_EMAIL\$</span>\n" +
+        "  </p>\n" +
+        "\n" +
+        "  <p>\n" +
+        "    By agreeing to this document, the Child's legal guardian(s) acknowledge that they have read, understood, and agree to the terms outlined in this Agreement.\n" +
+        "  </p>\n" +
+        "</div>";
   }
 
   static String buildTemplate(
